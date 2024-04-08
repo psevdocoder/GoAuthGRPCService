@@ -25,3 +25,4 @@ go.work
 *.json
 *.log
 config/local.yaml
+*.db

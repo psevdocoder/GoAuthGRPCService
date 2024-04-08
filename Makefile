@@ -3,3 +3,19 @@ protoc-gen:
 
 run:
 	go run cmd/sso/main.go
+
+run-migrator:
+	go run cmd/migrator/main.go --storage-path=./storage/database.db --migrations-path=./migrations
+
+migrate:
+	migrate -path=./migrations -database "sqlite3://storage/database.db" up
+
+migrate-down:
+	migrate -path=./migrations -database "sqlite3://storage/database.db" down 1
+
+migrate-install-sqlite:
+	go install -tags 'sqlite3' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+migrate-install-postgres:
+	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+

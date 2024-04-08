@@ -16,8 +16,7 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-  uint64 user_id = 1;
-  string username = 2;
+  uint32 user_id = 1;
 }
 
 message LoginRequest {
@@ -32,7 +31,7 @@ message LoginResponse {
 }
 
 message GetRoleRequest {
-  uint64 user_id = 1;
+  uint32 user_id = 1;
 }
 
 message GetRoleResponse {

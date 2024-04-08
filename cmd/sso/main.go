@@ -11,15 +11,16 @@ import (
 	"syscall"
 )
 
+const (
+	envLocal = "local"
+	envDev   = "dev"
+	envProd  = "prod"
+)
+
 func main() {
 	cfg := config.MustLoad()
 
-	logfile, err := os.OpenFile(fmt.Sprintf("logs/env_%s.log", cfg.Env), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		panic(err)
-	}
-
-	log := SetupLogger(cfg.Env, logfile)
+	log, logfile := SetupLogger(cfg.Env)
 	log.Debug("Loaded config", "config", *cfg)
 
 	application := app.New(log, cfg.GRPC.Port, cfg.StoragePath, cfg.TokenTTL)
@@ -39,16 +40,17 @@ func main() {
 	_ = logfile.Close()
 }
 
-const (
-	envLocal = "local"
-	envDev   = "dev"
-	envProd  = "prod"
-)
+func SetupLogger(env string) (*slog.Logger, *os.File) {
 
-func SetupLogger(env string, file *os.File) *slog.Logger {
+	logfile, err := os.OpenFile(
+		fmt.Sprintf("logs/env_%s.log", env), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+
 	var logger *slog.Logger
 
-	multiWriter := io.MultiWriter(os.Stdout, file)
+	multiWriter := io.MultiWriter(os.Stdout, logfile)
 
 	switch env {
 	case envLocal:
@@ -61,5 +63,6 @@ func SetupLogger(env string, file *os.File) *slog.Logger {
 		logger = slog.New(
 			slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	}
-	return logger
+
+	return logger, logfile
 }

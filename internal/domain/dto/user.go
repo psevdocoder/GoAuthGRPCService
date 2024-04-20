@@ -2,7 +2,6 @@ package dto
 
 import (
 	"github.com/go-playground/validator/v10"
-	_ "github.com/go-playground/validator/v10"
 )
 
 type LoginInput struct {

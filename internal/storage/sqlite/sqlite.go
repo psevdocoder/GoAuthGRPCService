@@ -14,11 +14,6 @@ type Storage struct {
 	db *sql.DB
 }
 
-func (s *Storage) App(ctx context.Context, appID uint32) (models.App, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func New(storagePath string) (*Storage, error) {
 	const op = "storage.sqlite.New"
 	db, err := sql.Open("sqlite3", storagePath)
@@ -30,6 +25,27 @@ func New(storagePath string) (*Storage, error) {
 
 func (s *Storage) Stop() error {
 	return s.db.Close()
+}
+
+func (s *Storage) App(ctx context.Context, appID uint32) (models.App, error) {
+	const op = "storage.sqlite.App"
+	stmt, err := s.db.PrepareContext(ctx, "SELECT id, name, secret FROM apps WHERE id = ?")
+	if err != nil {
+		return models.App{}, fmt.Errorf("%s, %w", op, err)
+	}
+
+	row := stmt.QueryRowContext(ctx, appID)
+
+	var app models.App
+	err = row.Scan(&app.ID, &app.Name, &app.Secret)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.App{}, fmt.Errorf("%s, %w", op, storage.ErrAppNotFound)
+		}
+		return models.App{}, fmt.Errorf("%s, %w", op, err)
+	}
+
+	return app, nil
 }
 
 func (s *Storage) SaveUser(ctx context.Context, username string, passHash []byte) (uint, error) {
@@ -82,15 +98,15 @@ func (s *Storage) User(ctx context.Context, username string) (models.User, error
 	return user, nil
 }
 
-func (s *Storage) Role(ctx context.Context, username string) (uint, error) {
+func (s *Storage) Role(ctx context.Context, userID uint32) (uint, error) {
 	const op = "storage.sqlite.Role"
 
-	stmt, err := s.db.PrepareContext(ctx, "SELECT role FROM users WHERE username = ?")
+	stmt, err := s.db.PrepareContext(ctx, "SELECT role FROM users WHERE id = ?")
 	if err != nil {
 		return 0, fmt.Errorf("%s, %w", op, err)
 	}
 
-	row := stmt.QueryRowContext(ctx, username)
+	row := stmt.QueryRowContext(ctx, userID)
 
 	var role uint
 	err = row.Scan(&role)

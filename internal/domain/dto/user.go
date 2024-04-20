@@ -7,7 +7,7 @@ import (
 
 type LoginInput struct {
 	Username string `validate:"required,min=4,max=32"`
-	Password string `validate:"required,min=8,max=48,alphanum"`
+	Password string `validate:"required,min=8,max=48"`
 	AppID    uint32 `validate:"required,numeric,gt=0"`
 }
 
@@ -18,7 +18,7 @@ func (i LoginInput) Validate() error {
 
 type RegisterInput struct {
 	Username string `validate:"required,min=4,max=32"`
-	Password string `validate:"required,alphanum,min=8"`
+	Password string `validate:"required,min=8"`
 }
 
 func (v *RegisterInput) Validate() error {

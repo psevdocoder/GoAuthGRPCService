@@ -18,6 +18,8 @@ func main() {
 
 	flag.Parse()
 
+	fmt.Println(storagePath, migrationsPath, migrationsTable)
+
 	if storagePath == "" || migrationsPath == "" {
 		fmt.Println("qwe", storagePath, migrationsPath)
 		panic("storage-path and migrations-path are both required")

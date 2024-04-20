@@ -7,6 +7,9 @@ run:
 run-migrator:
 	go run cmd/migrator/main.go --storage-path=./storage/database.db --migrations-path=./migrations
 
+run-migrator-tests:
+	go run .\cmd\migrator\main.go --storage-path=./storage/database.db --migrations-path=./tests/migrations --migrations-table=migrations_test
+
 migrate:
 	migrate -path=./migrations -database "sqlite3://storage/database.db" up
 
@@ -18,4 +21,3 @@ migrate-install-sqlite:
 
 migrate-install-postgres:
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-

@@ -14,7 +14,7 @@ import (
 type Auth interface {
 	Login(ctx context.Context, input dto.LoginInput) (string, error)
 	Register(ctx context.Context, input dto.RegisterInput) (uint, error)
-	Role(ctx context.Context, username string) (uint, error)
+	Role(ctx context.Context, userID uint32) (uint32, error)
 }
 
 type ServerAPI struct {
@@ -79,5 +79,10 @@ func (s *ServerAPI) Register(ctx context.Context, req *authservice.RegisterReque
 
 func (s *ServerAPI) GetRole(ctx context.Context, req *authservice.GetRoleRequest) (
 	*authservice.GetRoleResponse, error) {
-	panic("implement me")
+
+	role, err := s.auth.Role(ctx, req.GetUserId())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &authservice.GetRoleResponse{Role: role}, nil
 }

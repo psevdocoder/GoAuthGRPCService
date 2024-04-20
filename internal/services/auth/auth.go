@@ -19,7 +19,7 @@ type UserSaver interface {
 
 type UserProvider interface {
 	User(ctx context.Context, username string) (models.User, error)
-	Role(ctx context.Context, username string) (uint, error)
+	Role(ctx context.Context, userID uint32) (uint, error)
 }
 
 type AppProvider interface {
@@ -126,13 +126,13 @@ func (a *Auth) Login(ctx context.Context, input dto.LoginInput) (string, error) 
 	return token, nil
 }
 
-func (a *Auth) Role(ctx context.Context, username string) (uint, error) {
+func (a *Auth) Role(ctx context.Context, userID uint32) (uint32, error) {
 	const op = "auth.Role"
 	log := a.log.With(slog.String("op", op))
 
-	log.Info("get role attempt", slog.String("username", username))
+	log.Info("get role attempt", slog.Uint64("userID", uint64(userID)))
 
-	role, err := a.usrProvider.Role(ctx, username)
+	role, err := a.usrProvider.Role(ctx, userID)
 	if err != nil {
 		if errors.Is(err, storage.ErrUserNotFound) {
 			log.Error("user not found", slog.String("err", err.Error()))
@@ -143,7 +143,7 @@ func (a *Auth) Role(ctx context.Context, username string) (uint, error) {
 		return 0, errors.New("failed to get role")
 	}
 
-	log.Info("get role success", slog.String("username", username), slog.Int("role", int(role)))
+	log.Info("get role success", slog.Uint64("userID", uint64(userID)), slog.Int("role", int(role)))
 
-	return role, nil
+	return uint32(role), nil
 }
